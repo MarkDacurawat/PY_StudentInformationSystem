@@ -1,0 +1,391 @@
+import customtkinter
+from tkinter import *
+from tkinter import messagebox,ttk
+import tkinter as tk
+from dotenv import load_dotenv, dotenv_values
+import mysql.connector
+from mysql.connector import Error
+
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("green")
+
+app = customtkinter.CTk()
+app.title("Main Page")
+app.geometry("1920x680+-5+5")
+
+# ---------- FUNCTIONS ------------
+
+def add_data():
+    lrn = studentLRNEntry.get()
+    first_name = studentFNameEntry.get()
+    middle_name = studentMNameEntry.get()
+    last_name = studentLNameEntry.get()
+    gender = studentGenderEntry.get()
+    address = studentAddressEntry.get()
+    phone_number = studentPhoneNumberEntry.get()
+    year_enrolled = studentYearEnrolledEntry.get()
+
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Execute an INSERT query
+        cursor.execute("INSERT INTO students (student_lrn, student_firstname, student_middlename, student_lastname, student_gender, student_address, student_phonenumber, student_year_enrolled) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_enrolled))
+
+        # Commit the changes
+        connection.commit()
+
+        # Fetch updated data and refresh the Treeview
+        fetch_data()
+
+        # Clear the entry fields
+        clearFunction()
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error adding data to the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def update_data():
+    # Get the selected item from the Treeview
+    selected_item = studentTable.selection()
+
+    if not selected_item:
+        messagebox.showwarning("Warning", "Please select a row to update.")
+        return
+
+    # Get the values of the selected item
+    values = studentTable.item(selected_item, 'values')
+
+    # Extract the ID from the values
+    selected_id = values[0]
+
+    # Check if all required entry fields have values
+    if not all((studentLRNEntry.get(), studentFNameEntry.get(), studentMNameEntry.get(), studentLNameEntry.get(), studentGenderEntry.get(), studentAddressEntry.get(), studentPhoneNumberEntry.get(), studentYearEnrolledEntry.get())):
+        messagebox.showwarning("Warning", "Please fill in all required fields before updating.")
+        return
+
+    lrn = studentLRNEntry.get()
+    first_name = studentFNameEntry.get()
+    middle_name = studentMNameEntry.get()
+    last_name = studentLNameEntry.get()
+    gender = studentGenderEntry.get()
+    address = studentAddressEntry.get()
+    phone_number = studentPhoneNumberEntry.get()
+    year_enrolled = studentYearEnrolledEntry.get()
+
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Execute an UPDATE query
+        cursor.execute("UPDATE students SET student_lrn=%s, student_firstname=%s, student_middlename=%s, student_lastname=%s, student_gender=%s, student_address=%s, student_phonenumber=%s, student_year_enrolled=%s WHERE id=%s",
+                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_enrolled, selected_id))
+
+        # Commit the changes
+        connection.commit()
+
+        # Fetch updated data and refresh the Treeview
+        fetch_data()
+
+        # Clear the entry fields
+        clearFunction()
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error updating data in the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def delete_data():
+    # Get the selected item from the Treeview
+    selected_item = studentTable.selection()
+
+    if not selected_item:
+        messagebox.showwarning("Warning", "Please select a row to delete.")
+        return
+
+    # Get the values of the selected item
+    values = studentTable.item(selected_item, 'values')
+
+    # Extract the ID from the values
+    selected_id = values[0]
+
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Execute a DELETE query
+        cursor.execute("DELETE FROM students WHERE id=%s", (selected_id,))
+
+        # Commit the changes
+        connection.commit()
+
+        # Fetch updated data and refresh the Treeview
+        fetch_data()
+
+        # Clear the entry fields
+        clearFunction()
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error deleting data from the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def select_data():
+    # Get the selected item from the Treeview
+    selected_item = studentTable.selection()
+
+    if not selected_item:
+        messagebox.showwarning("Warning", "Please select a row.")
+        return
+
+    # Fetch data for the selected item and populate the entry fields
+    values = studentTable.item(selected_item, 'values')
+    studentLRNEntry.delete(0, 'end')
+    studentLRNEntry.insert(0, values[1])  # LRN
+    studentFNameEntry.delete(0, 'end')
+    studentFNameEntry.insert(0, values[2])  # First Name
+    studentMNameEntry.delete(0, 'end')
+    studentMNameEntry.insert(0, values[3])  # Middle Name
+    studentLNameEntry.delete(0, 'end')
+    studentLNameEntry.insert(0, values[4])  # Last Name
+    studentGenderEntry.set(values[5])  # Gender
+    studentAddressEntry.delete(0, 'end')
+    studentAddressEntry.insert(0, values[6])  # Address
+    studentPhoneNumberEntry.delete(0, 'end')
+    studentPhoneNumberEntry.insert(0, values[7])  # Phone Number
+    studentYearEnrolledEntry.delete(0, 'end')
+    studentYearEnrolledEntry.insert(0, values[8])  # Year Enrolled
+
+def clearFunction():
+    for entry_widget in (studentLRNEntry, studentFNameEntry, studentMNameEntry, studentLNameEntry, studentAddressEntry, studentPhoneNumberEntry, studentYearEnrolledEntry):
+        entry_widget.delete(0, 'end')
+
+def fetch_data(search_query=None):
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Construct the SELECT query with a WHERE clause for search
+        if search_query:
+            query = "SELECT * FROM students WHERE student_lrn LIKE %s OR student_firstname LIKE %s OR student_middlename LIKE %s OR student_lastname LIKE %s"
+            search_pattern = f"%{search_query}%"
+            cursor.execute(query, (search_pattern, search_pattern, search_pattern,search_pattern))
+        else:
+            # Execute a SELECT query without search
+            cursor.execute("SELECT * FROM students")
+
+        # Fetch all the rows
+        rows = cursor.fetchall()
+
+        # Clear existing data in the Treeview
+        for row in studentTable.get_children():
+            studentTable.delete(row)
+
+        # Insert fetched data into the Treeview
+        for row in rows:
+            studentTable.insert("", "end", values=row)
+            print(row)
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error fetching data from the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def search_data():
+    # Get the search query from the entry
+    search_query = searchEntry.get()
+
+    # Fetch data based on the search query
+    fetch_data(search_query)
+
+
+# ---------- END OF FUNCTIONS ------------
+
+pageTitle = customtkinter.CTkLabel(app, text="STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"))
+pageTitle.pack(pady=20, anchor="center")
+
+# ---------- FORM FRAME------------
+formsFrame = customtkinter.CTkFrame(app, height=220)
+formsFrame.pack(fill=X,padx=30)
+
+studentLRNFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentLRNFrame.place(x=55,y=25)
+studentLRNLabel = customtkinter.CTkLabel(studentLRNFrame,text="STUDENT LRN: ",font=('Arial',13,'bold'))
+studentLRNLabel.place(x=0,y=3)
+studentLRNEntry = customtkinter.CTkEntry(studentLRNFrame,placeholder_text="Student LRN", width=250, height=35)
+studentLRNEntry.place(x=110,y=1)
+
+studentFNameFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentFNameFrame.place(x=55,y=90)
+studentFNameLabel = customtkinter.CTkLabel(studentFNameFrame,text="FIRST NAME: ",font=('Arial',13,'bold'))
+studentFNameLabel.place(x=0,y=3)
+studentFNameEntry = customtkinter.CTkEntry(studentFNameFrame,placeholder_text="First Name", width=250, height=35)
+studentFNameEntry.place(x=110,y=1)
+
+studentMNameFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentMNameFrame.place(x=55,y=155)
+studentMNameLabel = customtkinter.CTkLabel(studentMNameFrame,text="MIDDLE NAME: ",font=('Arial',13,'bold'))
+studentMNameLabel.place(x=0,y=3)
+studentMNameEntry = customtkinter.CTkEntry(studentMNameFrame,placeholder_text="Middle Name", width=250, height=35)
+studentMNameEntry.place(x=110,y=1)
+
+studentLNameFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentLNameFrame.place(x=475,y=25)
+studentLNameLabel = customtkinter.CTkLabel(studentLNameFrame,text="LAST NAME: ",font=('Arial',13,'bold'))
+studentLNameLabel.place(x=0,y=3)
+studentLNameEntry = customtkinter.CTkEntry(studentLNameFrame,placeholder_text="Last Name", width=250, height=35)
+studentLNameEntry.place(x=110,y=1)
+
+studentGenderFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentGenderFrame.place(x=475,y=90)
+studentGenderLabel = customtkinter.CTkLabel(studentGenderFrame,text="GENDER: ",font=('Arial',13,'bold'))
+studentGenderLabel.place(x=0,y=3)
+studentGenderEntry = customtkinter.CTkOptionMenu(studentGenderFrame, width=250, height=35,values=['Male','Female'])
+studentGenderEntry.place(x=110,y=1)
+
+studentAddressFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentAddressFrame.place(x=475,y=155)
+studentAddressLabel = customtkinter.CTkLabel(studentAddressFrame,text="ADDRESS: ",font=('Arial',13,'bold'))
+studentAddressLabel.place(x=0,y=3)
+studentAddressEntry = customtkinter.CTkEntry(studentAddressFrame,placeholder_text="Address", width=250, height=35)
+studentAddressEntry.place(x=110,y=1)
+
+studentPhoneNumberFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentPhoneNumberFrame.place(x=895,y=25)
+studentPhoneNumberLabel = customtkinter.CTkLabel(studentPhoneNumberFrame,text="MOBILE NUM: ",font=('Arial',13,'bold'))
+studentPhoneNumberLabel.place(x=0,y=3)
+studentPhoneNumberEntry = customtkinter.CTkEntry(studentPhoneNumberFrame,placeholder_text="Phone Number", width=250, height=35)
+studentPhoneNumberEntry.place(x=110,y=1)
+
+studentYearEnrolledFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentYearEnrolledFrame.place(x=895,y=90)
+studentYearEnrolledLabel = customtkinter.CTkLabel(studentYearEnrolledFrame,text="YEAR ENROLLED: ",font=('Arial',13,'bold'))
+studentYearEnrolledLabel.place(x=0,y=3)
+studentYearEnrolledEntry = customtkinter.CTkEntry(studentYearEnrolledFrame,placeholder_text="Year Enrolled", width=220, height=35)
+studentYearEnrolledEntry.place(x=140,y=1)
+
+clearButton = customtkinter.CTkButton(formsFrame,text='CLEAR',height=40,fg_color='darkred',hover_color="red",command=clearFunction)
+clearButton.place(x=1115,y=155)
+# ---------- END OF FORM FRAME------------
+
+# ---------- BUTTONS FRAME------------
+buttonsFrame = customtkinter.CTkFrame(app, height=70)
+buttonsFrame.pack(fill=X,padx=30,pady=10)
+
+selectButton = customtkinter.CTkButton(buttonsFrame,text='SELECT',height=40,command=select_data)
+selectButton.place(x=55,y=15)
+
+addButton = customtkinter.CTkButton(buttonsFrame,text='ADD STUDENT',height=40,command=add_data)
+addButton.place(x=230,y=15)
+
+updateButton = customtkinter.CTkButton(buttonsFrame,text='UPDATE',height=40,command=update_data)
+updateButton.place(x=405,y=15)
+
+deleteButton = customtkinter.CTkButton(buttonsFrame,text='DELETE',height=40,fg_color='red',hover_color="darkred",command=delete_data)
+deleteButton.place(x=580,y=15)
+
+searchFrame = customtkinter.CTkFrame(buttonsFrame,width=380,height=35,fg_color='transparent')
+searchFrame.place(x=780,y=18)
+searchLabel = customtkinter.CTkLabel(searchFrame,text="Search: ",font=('Arial',13,'bold'))
+searchLabel.place(x=0,y=3)
+searchEntry = customtkinter.CTkEntry(searchFrame,placeholder_text="Search", width=200, height=35)
+searchEntry.place(x=80,y=1)
+
+searchButton = customtkinter.CTkButton(buttonsFrame,text='SEARCH',height=40,command=search_data)
+searchButton.place(x=1100,y=15)
+
+# ---------- END OF BUTTONS FRAME------------
+
+# ---------- TABLE FRAME------------
+tableFrame = customtkinter.CTkFrame(app, height=275)
+tableFrame.pack(fill=X,padx=30)
+
+columns = ("id", "lrn", "first_name", "middle_name", "last_name", "gender", "address", "phone_number", "year_enrolled")
+
+studentTable = ttk.Treeview(tableFrame, columns=columns,show="headings")
+
+# Add columns
+for col in columns:
+    studentTable.heading(col, text=col.upper())
+
+
+fetch_data()
+
+# Create vertical scrollbar
+vsb = customtkinter.CTkScrollbar(tableFrame,orientation="vertical",command=studentTable.yview)
+studentTable.configure(yscrollcommand=vsb.set)
+
+
+# Create horizontal scrollbar
+hsb = customtkinter.CTkScrollbar(tableFrame,orientation="horizontal",command=studentTable.xview)
+studentTable.configure(xscrollcommand=hsb.set)
+
+
+# Place the Treeview and scrollbars in the frame
+studentTable.grid(row=0, column=0, sticky="nsew")
+vsb.grid(row=0, column=1, sticky="ns")
+hsb.grid(row=1, column=0, sticky="ew")
+
+# Configure row and column weights to make the Treeview expand
+tableFrame.rowconfigure(0, weight=1)
+tableFrame.columnconfigure(0, weight=1)
+
+# ---------- END OF TABLE FRAME------------
+
+app.mainloop()

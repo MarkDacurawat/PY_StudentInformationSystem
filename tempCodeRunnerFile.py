@@ -1,0 +1,1 @@
+columns=("lrn", "first_name", "middle_name", "last_name", "gender", "address", "phone_number", "year_enrolled")
