@@ -5,6 +5,7 @@ import tkinter as tk
 from dotenv import load_dotenv, dotenv_values
 import mysql.connector
 from mysql.connector import Error
+import re
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("green")
@@ -14,8 +15,63 @@ app.title("Main Page")
 app.geometry("1920x680+-5+5")
 
 # ---------- FUNCTIONS ------------
+lrn_pattern = re.compile(r'^\d{12}$')
+first_name_pattern = re.compile(r'^[A-Za-z]+$')
+middle_name_pattern = re.compile(r'^[A-Za-z]*(?: [A-Za-z]+)*$')
+last_name_pattern = re.compile(r'^[A-Za-z]+(?:-[A-Za-z]+)?$')
+address_pattern = re.compile(r'^[A-Za-z0-9\s\.,#-]+$')
+phone_number_pattern = re.compile(r'^\d{11}$')
+year_enrolled_pattern = re.compile(r'^\d{4}$')
+
+def validate_input():
+    lrn = studentLRNEntry.get()
+    first_name = studentFNameEntry.get()
+    middle_name = studentMNameEntry.get()
+    last_name = studentLNameEntry.get()
+    address = studentAddressEntry.get()
+    phone_number = studentPhoneNumberEntry.get()
+    year_enrolled = studentYearEnrolledEntry.get()
+
+    if not lrn_pattern.match(lrn):
+        messagebox.showwarning("Warning", "Invalid LRN format.")
+        return False
+
+    if not first_name_pattern.match(first_name):
+        messagebox.showwarning("Warning", "Invalid first name format. Please enter only alphabetical characters (A-Z, a-z)."
+)
+        return False
+
+    if not middle_name_pattern.match(middle_name):
+        messagebox.showwarning("Warning", "Invalid middle name format. Please enter alphabetical characters (A-Z, a-z) and optionally separated by spaces."
+)
+        return False
+
+    if not last_name_pattern.match(last_name):
+        messagebox.showwarning("Warning", "Invalid last name format. Please enter alphabetical characters (A-Z, a-z) and optionally hyphenated."
+)
+        return False
+
+    if not address_pattern.match(address):
+        messagebox.showwarning("Warning", "Invalid address format. Please use only letters (A-Z, a-z), numbers (0-9), and the following special characters: space, comma, period, hash, and hyphen."
+)
+        return False
+
+    if not phone_number_pattern.match(phone_number):
+        messagebox.showwarning("Warning", "Invalid phone number format. Please enter a valid 11-digit phone number without spaces or special characters."
+)
+        return False
+
+    if not year_enrolled_pattern.match(year_enrolled):
+        messagebox.showwarning("Warning", "Invalid year format. Please enter a valid 4-digit year."
+)
+        return False
+
+    return True
 
 def add_data():
+    if not validate_input():
+        return
+    
     lrn = studentLRNEntry.get()
     first_name = studentFNameEntry.get()
     middle_name = studentMNameEntry.get()
@@ -61,6 +117,9 @@ def add_data():
             connection.close()
 
 def update_data():
+    if not validate_input():
+        return
+    
     # Get the selected item from the Treeview
     selected_item = studentTable.selection()
 
@@ -235,7 +294,6 @@ def fetch_data(search_query=None):
         # Insert fetched data into the Treeview
         for row in rows:
             studentTable.insert("", "end", values=row)
-            print(row)
 
     except Error as e:
         messagebox.showerror("Error", f"Error fetching data from the database: {e}")
