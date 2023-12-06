@@ -1,0 +1,38 @@
+# Python-specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+
+# Environment variables
+.env
+
+# Editor-specific
+.vscode/
+.idea/
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Dependency directories
+venv/
+env/
+node_modules/
+
+# Log files
+*.log
+
+# Output files
+*.out
+
+# Temporary files
+*.tmp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
