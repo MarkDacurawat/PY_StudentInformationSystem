@@ -1,8 +1,7 @@
 import customtkinter
 from tkinter import *
-from tkinter import messagebox,ttk
+from tkinter import messagebox, ttk
 import tkinter as tk
-from dotenv import load_dotenv, dotenv_values
 import mysql.connector
 from mysql.connector import Error
 import re
@@ -21,7 +20,6 @@ middle_name_pattern = re.compile(r'^[A-Za-z]*(?: [A-Za-z]+)*$')
 last_name_pattern = re.compile(r'^[A-Za-z]+(?:-[A-Za-z]+)?$')
 address_pattern = re.compile(r'^[A-Za-z0-9\s\.,#-]+$')
 phone_number_pattern = re.compile(r'^\d{11}$')
-year_enrolled_pattern = re.compile(r'^\d{4}$')
 
 def validate_input():
     lrn = studentLRNEntry.get()
@@ -30,40 +28,30 @@ def validate_input():
     last_name = studentLNameEntry.get()
     address = studentAddressEntry.get()
     phone_number = studentPhoneNumberEntry.get()
-    year_enrolled = studentYearEnrolledEntry.get()
+    year_level = studentYearLevelEntry.get()
 
     if not lrn_pattern.match(lrn):
         messagebox.showwarning("Warning", "Invalid LRN format.")
         return False
 
     if not first_name_pattern.match(first_name):
-        messagebox.showwarning("Warning", "Invalid first name format. Please enter only alphabetical characters (A-Z, a-z)."
-)
+        messagebox.showwarning("Warning", "Invalid first name format. Please enter only alphabetical characters (A-Z, a-z).")
         return False
 
     if not middle_name_pattern.match(middle_name):
-        messagebox.showwarning("Warning", "Invalid middle name format. Please enter alphabetical characters (A-Z, a-z) and optionally separated by spaces."
-)
+        messagebox.showwarning("Warning", "Invalid middle name format. Please enter alphabetical characters (A-Z, a-z) and optionally separated by spaces.")
         return False
 
     if not last_name_pattern.match(last_name):
-        messagebox.showwarning("Warning", "Invalid last name format. Please enter alphabetical characters (A-Z, a-z) and optionally hyphenated."
-)
+        messagebox.showwarning("Warning", "Invalid last name format. Please enter alphabetical characters (A-Z, a-z) and optionally hyphenated.")
         return False
 
     if not address_pattern.match(address):
-        messagebox.showwarning("Warning", "Invalid address format. Please use only letters (A-Z, a-z), numbers (0-9), and the following special characters: space, comma, period, hash, and hyphen."
-)
+        messagebox.showwarning("Warning", "Invalid address format. Please use only letters (A-Z, a-z), numbers (0-9), and the following special characters: space, comma, period, hash, and hyphen.")
         return False
 
     if not phone_number_pattern.match(phone_number):
-        messagebox.showwarning("Warning", "Invalid phone number format. Please enter a valid 11-digit phone number without spaces or special characters."
-)
-        return False
-
-    if not year_enrolled_pattern.match(year_enrolled):
-        messagebox.showwarning("Warning", "Invalid year format. Please enter a valid 4-digit year."
-)
+        messagebox.showwarning("Warning", "Invalid phone number format. Please enter a valid 11-digit phone number without spaces or special characters.")
         return False
 
     return True
@@ -79,7 +67,9 @@ def add_data():
     gender = studentGenderEntry.get()
     address = studentAddressEntry.get()
     phone_number = studentPhoneNumberEntry.get()
-    year_enrolled = studentYearEnrolledEntry.get()
+    year_level = studentYearLevelEntry.get()
+    course = studentCourseEntry.get()
+
 
     try:
         # Establish a connection to the database
@@ -94,8 +84,8 @@ def add_data():
         cursor = connection.cursor()
 
         # Execute an INSERT query
-        cursor.execute("INSERT INTO students (student_lrn, student_firstname, student_middlename, student_lastname, student_gender, student_address, student_phonenumber, student_year_enrolled) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_enrolled))
+        cursor.execute("INSERT INTO students (student_lrn, student_firstname, student_middlename, student_lastname, student_gender, student_address, student_phonenumber, student_year_level,student_course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s)",
+                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level,course))
 
         # Commit the changes
         connection.commit()
@@ -134,7 +124,7 @@ def update_data():
     selected_id = values[0]
 
     # Check if all required entry fields have values
-    if not all((studentLRNEntry.get(), studentFNameEntry.get(), studentMNameEntry.get(), studentLNameEntry.get(), studentGenderEntry.get(), studentAddressEntry.get(), studentPhoneNumberEntry.get(), studentYearEnrolledEntry.get())):
+    if not all((studentLRNEntry.get(), studentFNameEntry.get(), studentMNameEntry.get(), studentLNameEntry.get(), studentGenderEntry.get(), studentAddressEntry.get(), studentPhoneNumberEntry.get(), studentYearLevelEntry.get())):
         messagebox.showwarning("Warning", "Please fill in all required fields before updating.")
         return
 
@@ -145,7 +135,8 @@ def update_data():
     gender = studentGenderEntry.get()
     address = studentAddressEntry.get()
     phone_number = studentPhoneNumberEntry.get()
-    year_enrolled = studentYearEnrolledEntry.get()
+    year_level = studentYearLevelEntry.get()
+    course = studentCourseEntry.get()
 
     try:
         # Establish a connection to the database
@@ -160,8 +151,8 @@ def update_data():
         cursor = connection.cursor()
 
         # Execute an UPDATE query
-        cursor.execute("UPDATE students SET student_lrn=%s, student_firstname=%s, student_middlename=%s, student_lastname=%s, student_gender=%s, student_address=%s, student_phonenumber=%s, student_year_enrolled=%s WHERE id=%s",
-                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_enrolled, selected_id))
+        cursor.execute("UPDATE students SET student_lrn=%s, student_firstname=%s, student_middlename=%s, student_lastname=%s, student_gender=%s, student_address=%s, student_phonenumber=%s, student_year_level=%s student_course=%s WHERE id=%s",
+                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level,course, selected_id))
 
         # Commit the changes
         connection.commit()
@@ -182,13 +173,18 @@ def update_data():
         if connection:
             connection.close()
 
-
 def delete_data():
     # Get the selected item from the Treeview
     selected_item = studentTable.selection()
 
     if not selected_item:
         messagebox.showwarning("Warning", "Please select a row to delete.")
+        return
+
+    # Ask for confirmation
+    confirmed = messagebox.askokcancel("Confirm Deletion", "Are you sure you want to delete this record?")
+
+    if not confirmed:
         return
 
     # Get the values of the selected item
@@ -231,35 +227,45 @@ def delete_data():
         if connection:
             connection.close()
 
+def fetch_data():
+    # Clear existing data in the Treeview
+    for record in studentTable.get_children():
+        studentTable.delete(record)
 
-def select_data():
-    # Get the selected item from the Treeview
-    selected_item = studentTable.selection()
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
 
-    if not selected_item:
-        messagebox.showwarning("Warning", "Please select a row.")
-        return
+        # Create a cursor object
+        cursor = connection.cursor()
 
-    # Fetch data for the selected item and populate the entry fields
-    values = studentTable.item(selected_item, 'values')
-    studentLRNEntry.delete(0, 'end')
-    studentLRNEntry.insert(0, values[1])  # LRN
-    studentFNameEntry.delete(0, 'end')
-    studentFNameEntry.insert(0, values[2])  # First Name
-    studentMNameEntry.delete(0, 'end')
-    studentMNameEntry.insert(0, values[3])  # Middle Name
-    studentLNameEntry.delete(0, 'end')
-    studentLNameEntry.insert(0, values[4])  # Last Name
-    studentGenderEntry.set(values[5])  # Gender
-    studentAddressEntry.delete(0, 'end')
-    studentAddressEntry.insert(0, values[6])  # Address
-    studentPhoneNumberEntry.delete(0, 'end')
-    studentPhoneNumberEntry.insert(0, values[7])  # Phone Number
-    studentYearEnrolledEntry.delete(0, 'end')
-    studentYearEnrolledEntry.insert(0, values[8])  # Year Enrolled
+        # Execute a SELECT query
+        cursor.execute("SELECT * FROM students")
+
+        # Fetch all records
+        records = cursor.fetchall()
+
+        # Insert records into the Treeview
+        for record in records:
+            studentTable.insert("", "end", values=record)
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error fetching data from the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 def clearFunction():
-    for entry_widget in (studentLRNEntry, studentFNameEntry, studentMNameEntry, studentLNameEntry, studentAddressEntry, studentPhoneNumberEntry, studentYearEnrolledEntry):
+    for entry_widget in (studentLRNEntry, studentFNameEntry, studentMNameEntry, studentLNameEntry, studentAddressEntry, studentPhoneNumberEntry,):
         entry_widget.delete(0, 'end')
 
 def fetch_data(search_query=None):
@@ -312,6 +318,31 @@ def search_data():
     # Fetch data based on the search query
     fetch_data(search_query)
 
+def select_data():
+    # Get the selected item from the Treeview
+    selected_item = studentTable.selection()
+
+    if not selected_item:
+        messagebox.showwarning("Warning", "Please select a row.")
+        return
+
+     # Fetch data for the selected item and populate the entry fields
+    values = studentTable.item(selected_item, 'values')
+    studentLRNEntry.delete(0, 'end')
+    studentLRNEntry.insert(0, values[1])  # LRN
+    studentFNameEntry.delete(0, 'end')
+    studentFNameEntry.insert(0, values[2])  # First Name
+    studentMNameEntry.delete(0, 'end')
+    studentMNameEntry.insert(0, values[3])  # Middle Name
+    studentLNameEntry.delete(0, 'end')
+    studentLNameEntry.insert(0, values[4])  # Last Name
+    studentGenderEntry.set(values[5])  # Gender
+    studentAddressEntry.delete(0, 'end')
+    studentAddressEntry.insert(0, values[6])  # Address
+    studentPhoneNumberEntry.delete(0, 'end')
+    studentPhoneNumberEntry.insert(0, values[7])  # Phone Number
+    studentYearLevelEntry.set(values[8])   # Year Level
+    studentCourseEntry.set(values[9])    # Course
 
 # ---------- END OF FUNCTIONS ------------
 
@@ -326,28 +357,28 @@ studentLRNFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color
 studentLRNFrame.place(x=55,y=25)
 studentLRNLabel = customtkinter.CTkLabel(studentLRNFrame,text="STUDENT LRN: ",font=('Arial',13,'bold'))
 studentLRNLabel.place(x=0,y=3)
-studentLRNEntry = customtkinter.CTkEntry(studentLRNFrame,placeholder_text="Student LRN", width=250, height=35)
+studentLRNEntry = customtkinter.CTkEntry(studentLRNFrame,placeholder_text="e.g 107921324321", width=250, height=35)
 studentLRNEntry.place(x=110,y=1)
 
 studentFNameFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
 studentFNameFrame.place(x=55,y=90)
 studentFNameLabel = customtkinter.CTkLabel(studentFNameFrame,text="FIRST NAME: ",font=('Arial',13,'bold'))
 studentFNameLabel.place(x=0,y=3)
-studentFNameEntry = customtkinter.CTkEntry(studentFNameFrame,placeholder_text="First Name", width=250, height=35)
+studentFNameEntry = customtkinter.CTkEntry(studentFNameFrame,placeholder_text="e.g Mark", width=250, height=35)
 studentFNameEntry.place(x=110,y=1)
 
 studentMNameFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
 studentMNameFrame.place(x=55,y=155)
 studentMNameLabel = customtkinter.CTkLabel(studentMNameFrame,text="MIDDLE NAME: ",font=('Arial',13,'bold'))
 studentMNameLabel.place(x=0,y=3)
-studentMNameEntry = customtkinter.CTkEntry(studentMNameFrame,placeholder_text="Middle Name", width=250, height=35)
+studentMNameEntry = customtkinter.CTkEntry(studentMNameFrame,placeholder_text="e.g Resma", width=250, height=35)
 studentMNameEntry.place(x=110,y=1)
 
 studentLNameFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
 studentLNameFrame.place(x=475,y=25)
 studentLNameLabel = customtkinter.CTkLabel(studentLNameFrame,text="LAST NAME: ",font=('Arial',13,'bold'))
 studentLNameLabel.place(x=0,y=3)
-studentLNameEntry = customtkinter.CTkEntry(studentLNameFrame,placeholder_text="Last Name", width=250, height=35)
+studentLNameEntry = customtkinter.CTkEntry(studentLNameFrame,placeholder_text="e.g Dacurawat", width=250, height=35)
 studentLNameEntry.place(x=110,y=1)
 
 studentGenderFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
@@ -361,25 +392,30 @@ studentAddressFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_c
 studentAddressFrame.place(x=475,y=155)
 studentAddressLabel = customtkinter.CTkLabel(studentAddressFrame,text="ADDRESS: ",font=('Arial',13,'bold'))
 studentAddressLabel.place(x=0,y=3)
-studentAddressEntry = customtkinter.CTkEntry(studentAddressFrame,placeholder_text="Address", width=250, height=35)
+studentAddressEntry = customtkinter.CTkEntry(studentAddressFrame,placeholder_text="e.g Blk 50 Lot 2 ...", width=250, height=35)
 studentAddressEntry.place(x=110,y=1)
 
 studentPhoneNumberFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
 studentPhoneNumberFrame.place(x=895,y=25)
 studentPhoneNumberLabel = customtkinter.CTkLabel(studentPhoneNumberFrame,text="MOBILE NUM: ",font=('Arial',13,'bold'))
 studentPhoneNumberLabel.place(x=0,y=3)
-studentPhoneNumberEntry = customtkinter.CTkEntry(studentPhoneNumberFrame,placeholder_text="Phone Number", width=250, height=35)
+studentPhoneNumberEntry = customtkinter.CTkEntry(studentPhoneNumberFrame,placeholder_text="e.g 09212121212", width=250, height=35)
 studentPhoneNumberEntry.place(x=110,y=1)
 
-studentYearEnrolledFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
-studentYearEnrolledFrame.place(x=895,y=90)
-studentYearEnrolledLabel = customtkinter.CTkLabel(studentYearEnrolledFrame,text="YEAR ENROLLED: ",font=('Arial',13,'bold'))
-studentYearEnrolledLabel.place(x=0,y=3)
-studentYearEnrolledEntry = customtkinter.CTkEntry(studentYearEnrolledFrame,placeholder_text="Year Enrolled", width=220, height=35)
-studentYearEnrolledEntry.place(x=140,y=1)
+studentYearLevelFrame = customtkinter.CTkFrame(formsFrame,width=380,height=35,fg_color='transparent')
+studentYearLevelFrame.place(x=895,y=90)
+studentYearLevelLabel = customtkinter.CTkLabel(studentYearLevelFrame,text="YEAR LEVEL: ",font=('Arial',13,'bold'))
+studentYearLevelLabel.place(x=0,y=3)
+studentYearLevelEntry = customtkinter.CTkOptionMenu(studentYearLevelFrame,width=250, height=35,values=['1st Year','2nd Year','3rd Year','4th Year'])
+studentYearLevelEntry.place(x=110,y=1)
 
-clearButton = customtkinter.CTkButton(formsFrame,text='CLEAR',height=40,fg_color='darkred',hover_color="red",command=clearFunction)
-clearButton.place(x=1115,y=155)
+# Create a frame for the course dropdown
+studentCourseFrame = customtkinter.CTkFrame(formsFrame, width=380, height=35, fg_color='transparent')
+studentCourseFrame.place(x=895, y=155)
+studentCourseLabel = customtkinter.CTkLabel(studentCourseFrame, text="COURSE: ", font=('Arial', 13, 'bold'))
+studentCourseLabel.place(x=0, y=3)
+studentCourseEntry = customtkinter.CTkOptionMenu(studentCourseFrame, width=250, height=35, values=['Bachelor', 'Bachelor', 'Bachelor', 'Bachelor'])
+studentCourseEntry.place(x=110, y=1)
 # ---------- END OF FORM FRAME------------
 
 # ---------- BUTTONS FRAME------------
@@ -414,7 +450,7 @@ searchButton.place(x=1100,y=15)
 tableFrame = customtkinter.CTkFrame(app, height=275)
 tableFrame.pack(fill=X,padx=30)
 
-columns = ("id", "lrn", "first_name", "middle_name", "last_name", "gender", "address", "phone_number", "year_enrolled")
+columns = ("id", "lrn", "first_name", "middle_name", "last_name", "gender", "address", "phone_number", "year_level","course")
 
 studentTable = ttk.Treeview(tableFrame, columns=columns,show="headings")
 
