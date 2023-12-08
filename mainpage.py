@@ -70,6 +70,62 @@ def add_data():
     year_level = studentYearLevelEntry.get()
     course = studentCourseEntry.get()
 
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Check if LRN already exists
+        cursor.execute("SELECT * FROM students WHERE student_lrn=%s", (lrn,))
+        existing_student = cursor.fetchone()
+
+        if existing_student:
+            messagebox.showwarning("Warning", "Student with the same LRN already exists.")
+            return
+
+        # Execute an INSERT query
+        cursor.execute("INSERT INTO students (student_lrn, student_firstname, student_middlename, student_lastname, student_gender, student_address, student_phonenumber, student_year_level,student_course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s)",
+                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level, course))
+
+        # Commit the changes
+        connection.commit()
+
+        # Fetch updated data and refresh the Treeview
+        fetch_data()
+
+        # Clear the entry fields
+        clearFunction()
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error adding data to the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+    if not validate_input():
+        return
+    
+    lrn = studentLRNEntry.get()
+    first_name = studentFNameEntry.get()
+    middle_name = studentMNameEntry.get()
+    last_name = studentLNameEntry.get()
+    gender = studentGenderEntry.get()
+    address = studentAddressEntry.get()
+    phone_number = studentPhoneNumberEntry.get()
+    year_level = studentYearLevelEntry.get()
+    course = studentCourseEntry.get()
+
 
     try:
         # Establish a connection to the database
@@ -116,6 +172,13 @@ def update_data():
     if not selected_item:
         messagebox.showwarning("Warning", "Please select a row to update.")
         return
+    
+    # Ask for confirmation
+    confirmed = messagebox.askokcancel("Confirm Deletion", "Are you sure you want to update this record?")
+
+    if not confirmed:
+        return
+
 
     # Get the values of the selected item
     values = studentTable.item(selected_item, 'values')
@@ -124,7 +187,7 @@ def update_data():
     selected_id = values[0]
 
     # Check if all required entry fields have values
-    if not all((studentLRNEntry.get(), studentFNameEntry.get(), studentMNameEntry.get(), studentLNameEntry.get(), studentGenderEntry.get(), studentAddressEntry.get(), studentPhoneNumberEntry.get(), studentYearLevelEntry.get())):
+    if not all((studentLRNEntry.get(), studentFNameEntry.get(), studentMNameEntry.get(), studentLNameEntry.get(), studentGenderEntry.get(), studentAddressEntry.get(), studentPhoneNumberEntry.get(), studentYearLevelEntry.get(),studentCourseEntry.get())):
         messagebox.showwarning("Warning", "Please fill in all required fields before updating.")
         return
 
@@ -151,7 +214,7 @@ def update_data():
         cursor = connection.cursor()
 
         # Execute an UPDATE query
-        cursor.execute("UPDATE students SET student_lrn=%s, student_firstname=%s, student_middlename=%s, student_lastname=%s, student_gender=%s, student_address=%s, student_phonenumber=%s, student_year_level=%s student_course=%s WHERE id=%s",
+        cursor.execute("UPDATE students SET student_lrn=%s, student_firstname=%s, student_middlename=%s, student_lastname=%s, student_gender=%s, student_address=%s, student_phonenumber=%s, student_year_level=%s, student_course=%s WHERE id=%s",
                        (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level,course, selected_id))
 
         # Commit the changes
@@ -414,7 +477,7 @@ studentCourseFrame = customtkinter.CTkFrame(formsFrame, width=380, height=35, fg
 studentCourseFrame.place(x=895, y=155)
 studentCourseLabel = customtkinter.CTkLabel(studentCourseFrame, text="COURSE: ", font=('Arial', 13, 'bold'))
 studentCourseLabel.place(x=0, y=3)
-studentCourseEntry = customtkinter.CTkOptionMenu(studentCourseFrame, width=250, height=35, values=['Bachelor', 'Bachelor', 'Bachelor', 'Bachelor'])
+studentCourseEntry = customtkinter.CTkOptionMenu(studentCourseFrame, width=250, height=35, values=['B.S Computer Science', 'B.S Tourism Mngt.', 'B.S Hospitality Mngt.', 'B.S Bus. Administration', 'BTVTed Education'])
 studentCourseEntry.place(x=110, y=1)
 # ---------- END OF FORM FRAME------------
 
