@@ -113,55 +113,6 @@ def add_data():
         if connection:
             connection.close()
 
-    if not validate_input():
-        return
-    
-    lrn = studentLRNEntry.get()
-    first_name = studentFNameEntry.get()
-    middle_name = studentMNameEntry.get()
-    last_name = studentLNameEntry.get()
-    gender = studentGenderEntry.get()
-    address = studentAddressEntry.get()
-    phone_number = studentPhoneNumberEntry.get()
-    year_level = studentYearLevelEntry.get()
-    course = studentCourseEntry.get()
-
-
-    try:
-        # Establish a connection to the database
-        connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="student_information_db"
-        )
-
-        # Create a cursor object
-        cursor = connection.cursor()
-
-        # Execute an INSERT query
-        cursor.execute("INSERT INTO students (student_lrn, student_firstname, student_middlename, student_lastname, student_gender, student_address, student_phonenumber, student_year_level,student_course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s)",
-                       (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level,course))
-
-        # Commit the changes
-        connection.commit()
-
-        # Fetch updated data and refresh the Treeview
-        fetch_data()
-
-        # Clear the entry fields
-        clearFunction()
-
-    except Error as e:
-        messagebox.showerror("Error", f"Error adding data to the database: {e}")
-
-    finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
 def update_data():
     if not validate_input():
         return
