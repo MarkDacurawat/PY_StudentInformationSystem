@@ -131,12 +131,7 @@ def mainpageOutput():
 
         try:
             # Establish a connection to the database
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="student_information_db"
-            )
+            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
 
             # Create a cursor object
             cursor = connection.cursor()
@@ -213,12 +208,7 @@ def mainpageOutput():
 
         try:
             # Establish a connection to the database
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="student_information_db"
-            )
+            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
 
             # Create a cursor object
             cursor = connection.cursor()
@@ -268,12 +258,7 @@ def mainpageOutput():
 
         try:
             # Establish a connection to the database
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="student_information_db"
-            )
+            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
 
             # Create a cursor object
             cursor = connection.cursor()
@@ -307,12 +292,7 @@ def mainpageOutput():
 
         try:
             # Establish a connection to the database
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="student_information_db"
-            )
+            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
 
             # Create a cursor object
             cursor = connection.cursor()
@@ -341,36 +321,31 @@ def mainpageOutput():
         for entry_widget in (studentLRNEntry, studentFNameEntry, studentMNameEntry, studentLNameEntry, studentAddressEntry, studentPhoneNumberEntry,):
             entry_widget.delete(0, 'end')
 
-    def fetch_search_data(search_query=None):
+    def fetch_search_data(search_query=None, year_level=None):
         try:
-            # Establish a connection to the database
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="student_information_db"
-            )
-
-            # Create a cursor object
+            connection = mysql.connector.connect(host=host, user=user, password=password, database=database)
             cursor = connection.cursor()
 
-            # Construct the SELECT query with a WHERE clause for search
             if search_query:
-                query = "SELECT * FROM students WHERE student_lrn LIKE %s OR student_firstname LIKE %s OR student_middlename LIKE %s OR student_lastname LIKE %s"
-                search_pattern = f"%{search_query}%"
-                cursor.execute(query, (search_pattern, search_pattern, search_pattern,search_pattern))
+                if year_level and not year_level == "All":
+                    query = "SELECT * FROM students WHERE (student_lrn LIKE %s OR student_firstname LIKE %s OR student_middlename LIKE %s OR student_lastname LIKE %s) AND student_year_level = %s"
+                    search_pattern = f"%{search_query}%"
+                    cursor.execute(query, (search_pattern, search_pattern, search_pattern, search_pattern, year_level))
+                else:
+                    query = "SELECT * FROM students WHERE student_lrn LIKE %s OR student_firstname LIKE %s OR student_middlename LIKE %s OR student_lastname LIKE %s"
+                    search_pattern = f"%{search_query}%"
+                    cursor.execute(query, (search_pattern, search_pattern, search_pattern, search_pattern))
             else:
-                # Execute a SELECT query without search
-                cursor.execute("SELECT * FROM students")
+                if year_level and not year_level == "All":
+                    cursor.execute("SELECT * FROM students WHERE student_year_level = %s", (year_level,))
+                else:
+                    cursor.execute("SELECT * FROM students")
 
-            # Fetch all the rows
             rows = cursor.fetchall()
 
-            # Clear existing data in the Treeview
             for row in studentTable.get_children():
                 studentTable.delete(row)
 
-            # Insert fetched data into the Treeview
             for row in rows:
                 studentTable.insert("", "end", values=row)
 
@@ -378,7 +353,6 @@ def mainpageOutput():
             messagebox.showerror("Error", f"Error fetching data from the database: {e}")
 
         finally:
-            # Close the cursor and connection
             if cursor:
                 cursor.close()
             if connection:
@@ -387,12 +361,7 @@ def mainpageOutput():
     def fetch_data_option(year_level):
         try:
             # Establish a connection to the database
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="student_information_db"
-            )
+            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
 
             # Create a cursor object
             cursor = connection.cursor()
@@ -427,11 +396,10 @@ def mainpageOutput():
                 connection.close()
 
     def search_data():
-        # Get the search query from the entry
         search_query = searchEntry.get()
+        year_level = yearLevelOption.get()
 
-        # Fetch data based on the search query
-        fetch_search_data(search_query)
+        fetch_search_data(search_query, year_level)
 
     def select_data():
         # Get the selected item from the Treeview
