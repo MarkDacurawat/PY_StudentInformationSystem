@@ -282,7 +282,7 @@ def clearFunction():
     for entry_widget in (studentLRNEntry, studentFNameEntry, studentMNameEntry, studentLNameEntry, studentAddressEntry, studentPhoneNumberEntry,):
         entry_widget.delete(0, 'end')
 
-def fetch_data(search_query=None):
+def fetch_search_data(search_query=None):
     try:
         # Establish a connection to the database
         connection = mysql.connector.connect(
@@ -325,12 +325,54 @@ def fetch_data(search_query=None):
         if connection:
             connection.close()
 
+def fetch_data_option(year_level):
+    try:
+        # Establish a connection to the database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="student_information_db"
+        )
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Construct the SELECT query with a WHERE clause for search
+        if year_level and not year_level == "All":
+            query = "SELECT * FROM students WHERE student_year_level = %s "
+            cursor.execute(query, (year_level,))
+        else:
+            # Execute a SELECT query without search
+            cursor.execute("SELECT * FROM students")
+
+        # Fetch all the rows
+        rows = cursor.fetchall()
+
+        # Clear existing data in the Treeview
+        for row in studentTable.get_children():
+            studentTable.delete(row)
+
+        # Insert fetched data into the Treeview
+        for row in rows:
+            studentTable.insert("", "end", values=row)
+
+    except Error as e:
+        messagebox.showerror("Error", f"Error fetching data from the database: {e}")
+
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
 def search_data():
     # Get the search query from the entry
     search_query = searchEntry.get()
 
     # Fetch data based on the search query
-    fetch_data(search_query)
+    fetch_search_data(search_query)
 
 def select_data():
     # Get the selected item from the Treeview
@@ -436,27 +478,34 @@ studentCourseEntry.place(x=110, y=1)
 buttonsFrame = customtkinter.CTkFrame(app, height=70)
 buttonsFrame.pack(fill=X,padx=30,pady=10)
 
-selectButton = customtkinter.CTkButton(buttonsFrame,text='SELECT',height=40,command=select_data)
-selectButton.place(x=55,y=15)
+selectButton = customtkinter.CTkButton(buttonsFrame,text='SELECT',height=40,width=130,command=select_data)
+selectButton.place(x=20,y=15)
 
-addButton = customtkinter.CTkButton(buttonsFrame,text='ADD STUDENT',height=40,command=add_data)
-addButton.place(x=230,y=15)
+addButton = customtkinter.CTkButton(buttonsFrame,text='ADD STUDENT',height=40,width=130,command=add_data)
+addButton.place(x=160,y=15)
 
-updateButton = customtkinter.CTkButton(buttonsFrame,text='UPDATE',height=40,command=update_data)
-updateButton.place(x=405,y=15)
+updateButton = customtkinter.CTkButton(buttonsFrame,text='UPDATE',height=40,width=130,command=update_data)
+updateButton.place(x=300,y=15)
 
-deleteButton = customtkinter.CTkButton(buttonsFrame,text='DELETE',height=40,fg_color='red',hover_color="darkred",command=delete_data)
-deleteButton.place(x=580,y=15)
+deleteButton = customtkinter.CTkButton(buttonsFrame,text='DELETE',height=40,width=130,fg_color='red',hover_color="darkred",command=delete_data)
+deleteButton.place(x=440,y=15)
+
+clearButton = customtkinter.CTkButton(buttonsFrame,text='CLEAR',height=40,width=100,fg_color='red',hover_color="darkred",command=clearFunction)
+clearButton.place(x=580,y=15)
+
+yearLevelOption = customtkinter.CTkOptionMenu(buttonsFrame,width=150, height=35,values=['All','1st Year','2nd Year','3rd Year','4th Year'],command=fetch_data_option)
+yearLevelOption.place(x=710, y=18)
+yearLevelOption.set("All")
 
 searchFrame = customtkinter.CTkFrame(buttonsFrame,width=380,height=35,fg_color='transparent')
-searchFrame.place(x=780,y=18)
+searchFrame.place(x=890,y=18)
 searchLabel = customtkinter.CTkLabel(searchFrame,text="Search: ",font=('Arial',13,'bold'))
 searchLabel.place(x=0,y=3)
 searchEntry = customtkinter.CTkEntry(searchFrame,placeholder_text="Search", width=200, height=35)
 searchEntry.place(x=80,y=1)
 
-searchButton = customtkinter.CTkButton(buttonsFrame,text='SEARCH',height=40,command=search_data)
-searchButton.place(x=1100,y=15)
+searchButton = customtkinter.CTkButton(buttonsFrame,text='SEARCH',height=40,width= 100,command=search_data)
+searchButton.place(x=1185,y=15)
 
 # ---------- END OF BUTTONS FRAME------------
 
