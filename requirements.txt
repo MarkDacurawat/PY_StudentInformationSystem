@@ -1,7 +1,5 @@
-
 customtkinter==5.1.2
 mysql-connector-python==8.2.0
 packaging==23.2
-python-dotenv==1.0.0
 pytube==15.0.0
 tk==0.1.0

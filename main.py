@@ -1,4 +1,3 @@
-from dotenv import load_dotenv, dotenv_values
 import customtkinter
 from tkinter import *
 from tkinter import messagebox, ttk
@@ -7,12 +6,10 @@ import mysql.connector
 from mysql.connector import Error
 import re
 
-config = dotenv_values('.env')
-
-host = config["DB_HOST"]
-user = config["DB_USER"]
-password = config["DB_PASSWORD"]
-database = config["DB_NAME"]
+host = "localhost"
+user = "root"
+password = ""
+database = "student_information_db"
 
 try:
     db = mysql.connector.connect(host=host,user=user,password=password,database=database)
@@ -74,9 +71,9 @@ def mainpageOutput():
 
     # ---------- FUNCTIONS ------------
     lrn_pattern = re.compile(r'^\d{12}$')
-    first_name_pattern = re.compile(r'^[A-Za-z]+$')
+    first_name_pattern = re.compile(r'^[A-Za-z]+(?: [A-Za-z]+)?$')
     middle_name_pattern = re.compile(r'^[A-Za-z]*(?: [A-Za-z]+)*$')
-    last_name_pattern = re.compile(r'^[A-Za-z]+(?:-[A-Za-z]+)?$')
+    last_name_pattern = re.compile(r'^[A-Za-z]+(?: [A-Za-z]+)?$')
     address_pattern = re.compile(r'^[A-Za-z0-9\s\.,#-]+$')
     phone_number_pattern = re.compile(r'^\d{11}$')
 

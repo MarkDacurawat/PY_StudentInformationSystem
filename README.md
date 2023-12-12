@@ -37,15 +37,6 @@ Before running the application, make sure you have the following installed:
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file in the project root and add your MySQL database credentials:
-
-   ```env
-   DB_HOST=localhost
-   DB_USER=root
-   DB_PASSWORD=your_password
-   DB_NAME=student_information_db
-   ```
-
 ## Usage
 
 Run the application using the following command:
