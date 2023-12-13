@@ -71,10 +71,10 @@ def mainpageOutput():
 
     # ---------- FUNCTIONS ------------
     lrn_pattern = re.compile(r'^\d{12}$')
-    first_name_pattern = re.compile(r'^[A-Za-z]+(?: [A-Za-z]+)?$')
-    middle_name_pattern = re.compile(r'^[A-Za-z]*(?: [A-Za-z]+)*$')
-    last_name_pattern = re.compile(r'^[A-Za-z]+(?: [A-Za-z]+)?$')
-    address_pattern = re.compile(r'^[A-Za-z0-9\s\.,#-]+$')
+    first_name_pattern = re.compile(r'^[A-Za-z]{1,30}(?: [A-Za-z]{1,30})?$')
+    middle_name_pattern = re.compile(r'^[A-Za-z]*(?: [A-Za-z]{1,30})*$')
+    last_name_pattern = re.compile(r'^[A-Za-z]{1,30}(?: [A-Za-z]{1,30})?$')
+    address_pattern = re.compile(r'^[A-Za-z0-9\s\.,#-]{1,100}$')
     phone_number_pattern = re.compile(r'^\d{11}$')
 
     def validate_input():
@@ -87,23 +87,23 @@ def mainpageOutput():
         year_level = studentYearLevelEntry.get()
 
         if not lrn_pattern.match(lrn):
-            messagebox.showwarning("Warning", "Invalid LRN format.")
+            messagebox.showwarning("Warning", "Invalid LRN format. Please enter a 12-digit numeric value.")
             return False
 
         if not first_name_pattern.match(first_name):
-            messagebox.showwarning("Warning", "Invalid first name format. Please enter only alphabetical characters (A-Z, a-z).")
+            messagebox.showwarning("Warning", "Invalid first name format. Please enter only alphabetical characters (A-Z, a-z) with a maximum length of 30 characters.")
             return False
 
         if not middle_name_pattern.match(middle_name):
-            messagebox.showwarning("Warning", "Invalid middle name format. Please enter alphabetical characters (A-Z, a-z) and optionally separated by spaces.")
+            messagebox.showwarning("Warning", "Invalid middle name format. Please enter alphabetical characters (A-Z, a-z) and optionally separated by spaces, with a maximum length of 30 characters.")
             return False
 
         if not last_name_pattern.match(last_name):
-            messagebox.showwarning("Warning", "Invalid last name format. Please enter alphabetical characters (A-Z, a-z) and optionally hyphenated.")
+            messagebox.showwarning("Warning", "Invalid last name format. Please enter alphabetical characters (A-Z, a-z) and optionally hyphenated, with a maximum length of 30 characters.")
             return False
 
         if not address_pattern.match(address):
-            messagebox.showwarning("Warning", "Invalid address format. Please use only letters (A-Z, a-z), numbers (0-9), and the following special characters: space, comma, period, hash, and hyphen.")
+            messagebox.showwarning("Warning", "Invalid address format. Please use only letters (A-Z, a-z), numbers (0-9), and the following special characters: space, comma, period, hash, and hyphen, with a maximum length of 100 characters.")
             return False
 
         if not phone_number_pattern.match(phone_number):
@@ -111,6 +111,7 @@ def mainpageOutput():
             return False
 
         return True
+
 
     def add_data():
         if not validate_input():
@@ -429,6 +430,9 @@ def mainpageOutput():
     pageTitle = customtkinter.CTkLabel(mainWindow, text="STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"))
     pageTitle.pack(pady=20, anchor="center")
 
+    addAdminButton = customtkinter.CTkButton(mainWindow,text='ADD ADMIN',height=40,width=130)
+    addAdminButton.place(x=1200,y=20)
+
     # ---------- FORM FRAME------------
     formsFrame = customtkinter.CTkFrame(mainWindow, height=220)
     formsFrame.pack(fill=X,padx=30)
@@ -541,10 +545,16 @@ def mainpageOutput():
 
     studentTable = ttk.Treeview(tableFrame, columns=columns,show="headings")
 
+    # Set the width of the "id" column
+    studentTable.column("id", width=50)
+    studentTable.column("lrn",width=100)
+    studentTable.column("gender",width=100)
+    studentTable.column("phone_number", width=100)   
+
     # Add columns
     for col in columns:
-        studentTable.heading(col, text=col.upper())
-
+        studentTable.heading(col, text=col.upper(),anchor=CENTER)
+        studentTable.column(col, anchor=CENTER)
 
     fetch_data()
 
