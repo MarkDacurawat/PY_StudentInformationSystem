@@ -63,6 +63,86 @@ def loginWindowOutput():
 
     loginWindow.mainloop()
 
+def signupWindowOutput():
+        global signupWindow
+        signupWindow = customtkinter.CTk()  # create CTk window like you do with the Tk window
+        signupWindow.title("Login Form")
+        signupWindow.geometry("400x380")
+
+        usernamePattern = re.compile(r'^[a-zA-Z0-9_]+$')
+        passwordPattern = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$')
+
+        def validate():
+            username = usernameEntry.get()
+            password = passwordEntry.get()
+
+            if not usernamePattern.match(username):
+                messagebox.showwarning("Warning", "Invalid username. Only alphanumeric characters (A-Z, a-z, 0-9) and underscores (_) are allowed.")
+                return False
+            if not passwordPattern.match(password):
+                messagebox.showwarning('Warning','''
+Invalid password. Please ensure your password meets the following criteria:
+                                       
+- At least one lowercase letter (a-z)
+- At least one uppercase letter (A-Z)
+- At least one digit (0-9)
+- Minimum length of 8 characters
+                                       ''')
+            return True
+
+        def signup():
+            username = usernameEntry.get()
+            password = passwordEntry.get()
+            
+            if not validate():
+                return
+            
+            cursor = None
+
+            try:
+                cursor = db.cursor()
+
+                # Check if LRN already exists
+                cursor.execute("SELECT * FROM admin WHERE username =%s", (username,))
+                existing_username = cursor.fetchone()
+
+                if existing_username:
+                    messagebox.showwarning("Warning", "Username already exists.")
+                    return
+
+                # Execute an INSERT query
+                cursor.execute("INSERT INTO admin (username,password) VALUES (%s,%s)",(username,password))
+
+                # Commit the changes
+                db.commit()
+
+                # Output Message if Successfully Add ADMIN
+                messagebox.showinfo('Successful',"Admin Added!")
+                signupWindow.withdraw()
+                loginWindowOutput()
+
+            except Error as e:
+                messagebox.showerror("Error", f"Error adding data to the database: {e}")
+
+            finally:
+                # Close the cursor
+                if cursor:
+                    cursor.close()
+
+            
+        customtkinter.CTkLabel(signupWindow,text="SIGN UP",font=("Arial",30,"bold")).place(x=135,y=80)
+
+        usernameEntry = customtkinter.CTkEntry(signupWindow,placeholder_text="Enter a Username",width=230)
+        usernameEntry.place(x=90,y=150)
+
+        passwordEntry = customtkinter.CTkEntry(signupWindow,placeholder_text="Enter a Password",show="*",width=230)
+        passwordEntry.place(x=90,y=200)
+
+        signupButton = customtkinter.CTkButton(signupWindow,width=230,height=40,text="SIGN UP",command=signup)
+        signupButton.place(x=90,y=250)
+
+        signupWindow.mainloop()
+
 def mainpageOutput():
     global mainWindow
     mainWindow = customtkinter.CTk()
@@ -128,11 +208,8 @@ def mainpageOutput():
         course = studentCourseEntry.get()
 
         try:
-            # Establish a connection to the database
-            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
-
             # Create a cursor object
-            cursor = connection.cursor()
+            cursor = db.cursor()
 
             # Check if LRN already exists
             cursor.execute("SELECT * FROM students WHERE student_lrn=%s", (lrn,))
@@ -147,7 +224,7 @@ def mainpageOutput():
                         (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level, course))
 
             # Commit the changes
-            connection.commit()
+            db.commit()
 
             # Fetch updated data and refresh the Treeview
             fetch_data()
@@ -159,11 +236,9 @@ def mainpageOutput():
             messagebox.showerror("Error", f"Error adding data to the database: {e}")
 
         finally:
-            # Close the cursor and connection
+            # Close the cursor
             if cursor:
                 cursor.close()
-            if connection:
-                connection.close()
 
     def update_data():
         if not validate_input():
@@ -205,18 +280,15 @@ def mainpageOutput():
         course = studentCourseEntry.get()
 
         try:
-            # Establish a connection to the database
-            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
-
             # Create a cursor object
-            cursor = connection.cursor()
+            cursor = db.cursor()
 
             # Execute an UPDATE query
             cursor.execute("UPDATE students SET student_lrn=%s, student_firstname=%s, student_middlename=%s, student_lastname=%s, student_gender=%s, student_address=%s, student_phonenumber=%s, student_year_level=%s, student_course=%s WHERE id=%s",
                         (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level,course, selected_id))
 
             # Commit the changes
-            connection.commit()
+            db.commit()
 
             # Fetch updated data and refresh the Treeview
             fetch_data()
@@ -228,11 +300,9 @@ def mainpageOutput():
             messagebox.showerror("Error", f"Error updating data in the database: {e}")
 
         finally:
-            # Close the cursor and connection
+            # Close the cursor
             if cursor:
                 cursor.close()
-            if connection:
-                connection.close()
 
     def delete_data():
         # Get the selected item from the Treeview
@@ -255,17 +325,14 @@ def mainpageOutput():
         selected_id = values[0]
 
         try:
-            # Establish a connection to the database
-            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
-
             # Create a cursor object
-            cursor = connection.cursor()
+            cursor = db.cursor()
 
             # Execute a DELETE query
             cursor.execute("DELETE FROM students WHERE id=%s", (selected_id,))
 
             # Commit the changes
-            connection.commit()
+            db.commit()
 
             # Fetch updated data and refresh the Treeview
             fetch_data()
@@ -277,11 +344,9 @@ def mainpageOutput():
             messagebox.showerror("Error", f"Error deleting data from the database: {e}")
 
         finally:
-            # Close the cursor and connection
+            # Close the cursor
             if cursor:
                 cursor.close()
-            if connection:
-                connection.close()
 
     def fetch_data():
         # Clear existing data in the Treeview
@@ -289,11 +354,8 @@ def mainpageOutput():
             studentTable.delete(record)
 
         try:
-            # Establish a connection to the database
-            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
-
             # Create a cursor object
-            cursor = connection.cursor()
+            cursor = db.cursor()
 
             # Execute a SELECT query
             cursor.execute("SELECT * FROM students")
@@ -309,11 +371,9 @@ def mainpageOutput():
             messagebox.showerror("Error", f"Error fetching data from the database: {e}")
 
         finally:
-            # Close the cursor and connection
+            # Close the cursor
             if cursor:
                 cursor.close()
-            if connection:
-                connection.close()
 
     def clearFunction():
         for entry_widget in (studentLRNEntry, studentFNameEntry, studentMNameEntry, studentLNameEntry, studentAddressEntry, studentPhoneNumberEntry,):
@@ -321,8 +381,7 @@ def mainpageOutput():
 
     def fetch_search_data(search_query=None, year_level=None):
         try:
-            connection = mysql.connector.connect(host=host, user=user, password=password, database=database)
-            cursor = connection.cursor()
+            cursor = db.cursor()
 
             if search_query:
                 if year_level and not year_level == "All":
@@ -353,16 +412,11 @@ def mainpageOutput():
         finally:
             if cursor:
                 cursor.close()
-            if connection:
-                connection.close()
 
     def fetch_data_option(year_level):
         try:
-            # Establish a connection to the database
-            connection = mysql.connector.connect(host=host,user=user,password=password,database=database)
-
             # Create a cursor object
-            cursor = connection.cursor()
+            cursor = db.cursor()
 
             # Construct the SELECT query with a WHERE clause for search
             if year_level and not year_level == "All":
@@ -387,11 +441,9 @@ def mainpageOutput():
             messagebox.showerror("Error", f"Error fetching data from the database: {e}")
 
         finally:
-            # Close the cursor and connection
+            # Close the cursor
             if cursor:
                 cursor.close()
-            if connection:
-                connection.close()
 
     def search_data():
         search_query = searchEntry.get()
@@ -430,8 +482,24 @@ def mainpageOutput():
     pageTitle = customtkinter.CTkLabel(mainWindow, text="STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"))
     pageTitle.pack(pady=20, anchor="center")
 
-    addAdminButton = customtkinter.CTkButton(mainWindow,text='ADD ADMIN',height=40,width=130)
-    addAdminButton.place(x=1200,y=20)
+    def add_admin():
+        mainWindow.withdraw()
+        signupWindowOutput()
+    
+    def logout():
+        # Ask for confirmation
+        confirmed = messagebox.askokcancel("Logout", "Are you sure you want to logout?")
+
+        if confirmed:
+            # Close the main window and open the login window
+            mainWindow.withdraw()
+            loginWindowOutput()
+
+    addAdminButton = customtkinter.CTkButton(mainWindow,text='ADD ADMIN',height=40,width=130, command=add_admin)
+    addAdminButton.place(x=1050,y=20)
+
+    logoutButton = customtkinter.CTkButton(mainWindow,text='LOGOUT',fg_color='red',hover_color='darkred',height=40,width=130, command=logout)
+    logoutButton.place(x=1200,y=20)
 
     # ---------- FORM FRAME------------
     formsFrame = customtkinter.CTkFrame(mainWindow, height=220)
