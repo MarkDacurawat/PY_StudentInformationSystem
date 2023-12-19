@@ -4,12 +4,14 @@ from tkinter import messagebox, ttk
 import tkinter as tk
 import mysql.connector
 from mysql.connector import Error
+from PIL import Image, ImageTk
 import re
 
 host = "localhost"
 user = "root"
 password = ""
 database = "student_information_db"
+
 
 try:
     db = mysql.connector.connect(host=host,user=user,password=password,database=database)
@@ -28,6 +30,8 @@ try:
 
             if user:
                 messagebox.showinfo(title="Login Successfully",message="Login Successfully!")
+                usernameEntry.delete(0,'end')
+                passwordEntry.delete(0,'end')
                 loginWindow.withdraw()
                 mainpageOutput()
             else:
@@ -48,26 +52,35 @@ def loginWindowOutput():
     global loginWindow
     loginWindow = customtkinter.CTk()  # create CTk window like you do with the Tk window
     loginWindow.title("Login Form")
-    loginWindow.geometry("400x380")
+    loginWindow.geometry("710x400")
 
-    customtkinter.CTkLabel(loginWindow,text="LOGIN FORM",font=("Arial",30,"bold")).place(x=105,y=80)
+    fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"), size=(300, 300))
+    loginLogo = customtkinter.CTkLabel(loginWindow,image=fepc_logo,text="")
+    loginLogo.place(x=40,y=50)
 
-    usernameEntry = customtkinter.CTkEntry(loginWindow,placeholder_text="Enter Your Username",width=230)
-    usernameEntry.place(x=90,y=150)
+    inputsFrame = customtkinter.CTkFrame(loginWindow, width=400,height=300,fg_color='transparent')
+    inputsFrame.place(x=360, y=50)
 
-    passwordEntry = customtkinter.CTkEntry(loginWindow,placeholder_text="Enter Your Password",show="*",width=230)
-    passwordEntry.place(x=90,y=200)
+    customtkinter.CTkLabel(inputsFrame,text="Login Form",font=("Arial",35,"bold")).place(x=20,y=0)
 
-    loginButton = customtkinter.CTkButton(loginWindow,width=230,height=40,text="LOGIN",command=lambda: authenticate(usernameEntry,passwordEntry))
-    loginButton.place(x=90,y=250)
+    usernameLabel = customtkinter.CTkLabel(inputsFrame, text="Username:",font=('Arial',12,'bold')).place(x=20,y=70)
+    usernameEntry = customtkinter.CTkEntry(inputsFrame,placeholder_text="Enter Your Username",width=280,height=35)
+    usernameEntry.place(x=20,y=95)
+
+    passwordLabel = customtkinter.CTkLabel(inputsFrame, text="Password:",font=('Arial',12,'bold')).place(x=20,y=140)
+    passwordEntry = customtkinter.CTkEntry(inputsFrame,placeholder_text="Enter Your Password",show="*",width=280,height=35)
+    passwordEntry.place(x=20,y=165)
+
+    loginButton = customtkinter.CTkButton(inputsFrame,width=280,height=40,text="LOGIN",command=lambda: authenticate(usernameEntry,passwordEntry))
+    loginButton.place(x=20,y=220)
 
     loginWindow.mainloop()
 
 def signupWindowOutput():
         global signupWindow
-        signupWindow = customtkinter.CTk()  # create CTk window like you do with the Tk window
+        signupWindow = customtkinter.CTkToplevel()  # create CTk window like you do with the Tk window
         signupWindow.title("Login Form")
-        signupWindow.geometry("400x380")
+        signupWindow.geometry("710x400")
 
         usernamePattern = re.compile(r'^[a-zA-Z0-9_]+$')
         passwordPattern = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$')
@@ -88,6 +101,7 @@ Invalid password. Please ensure your password meets the following criteria:
 - At least one digit (0-9)
 - Minimum length of 8 characters
                                        ''')
+                return False
             return True
 
         def signup():
@@ -119,7 +133,7 @@ Invalid password. Please ensure your password meets the following criteria:
                 # Output Message if Successfully Add ADMIN
                 messagebox.showinfo('Successful',"Admin Added!")
                 signupWindow.withdraw()
-                loginWindowOutput()
+                mainpageOutput()
 
             except Error as e:
                 messagebox.showerror("Error", f"Error adding data to the database: {e}")
@@ -128,24 +142,33 @@ Invalid password. Please ensure your password meets the following criteria:
                 # Close the cursor
                 if cursor:
                     cursor.close()
-
+        
             
-        customtkinter.CTkLabel(signupWindow,text="SIGN UP",font=("Arial",30,"bold")).place(x=135,y=80)
+        fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"), size=(300, 300))
+        signupLogo = customtkinter.CTkLabel(signupWindow,image=fepc_logo,text="")
+        signupLogo.place(x=40,y=50)
 
-        usernameEntry = customtkinter.CTkEntry(signupWindow,placeholder_text="Enter a Username",width=230)
-        usernameEntry.place(x=90,y=150)
+        inputsFrame = customtkinter.CTkFrame(signupWindow, width=400,height=300,fg_color='transparent')
+        inputsFrame.place(x=360, y=50)
 
-        passwordEntry = customtkinter.CTkEntry(signupWindow,placeholder_text="Enter a Password",show="*",width=230)
-        passwordEntry.place(x=90,y=200)
+        customtkinter.CTkLabel(inputsFrame,text="Signup Form",font=("Arial",35,"bold")).place(x=20,y=0)
 
-        signupButton = customtkinter.CTkButton(signupWindow,width=230,height=40,text="SIGN UP",command=signup)
-        signupButton.place(x=90,y=250)
+        usernameLabel = customtkinter.CTkLabel(inputsFrame, text="Username:",font=('Arial',12,'bold')).place(x=20,y=70)
+        usernameEntry = customtkinter.CTkEntry(inputsFrame,placeholder_text="Enter Your Username",width=280,height=35)
+        usernameEntry.place(x=20,y=95)
+
+        passwordLabel = customtkinter.CTkLabel(inputsFrame, text="Password:",font=('Arial',12,'bold')).place(x=20,y=140)
+        passwordEntry = customtkinter.CTkEntry(inputsFrame,placeholder_text="Enter Your Password",show="*",width=280,height=35)
+        passwordEntry.place(x=20,y=165)
+
+        signupButton = customtkinter.CTkButton(inputsFrame,width=280,height=40,text="SIGN UP",command=signup)
+        signupButton.place(x=20,y=220)
 
         signupWindow.mainloop()
 
 def mainpageOutput():
     global mainWindow
-    mainWindow = customtkinter.CTk()
+    mainWindow = customtkinter.CTkToplevel()
     mainWindow.title("Main Page")
     mainWindow.geometry("1920x680+-5+5")
 
@@ -478,8 +501,9 @@ def mainpageOutput():
         studentCourseEntry.set(values[9])    # Course
 
     # ---------- END OF FUNCTIONS ------------
+    fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"))
 
-    pageTitle = customtkinter.CTkLabel(mainWindow, text="STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"))
+    pageTitle = customtkinter.CTkLabel(mainWindow, text="STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"),image=fepc_logo,compound=tk.LEFT)
     pageTitle.pack(pady=20, anchor="center")
 
     def add_admin():
@@ -493,7 +517,7 @@ def mainpageOutput():
         if confirmed:
             # Close the main window and open the login window
             mainWindow.withdraw()
-            loginWindowOutput()
+            loginWindow.deiconify()
 
     addAdminButton = customtkinter.CTkButton(mainWindow,text='ADD ADMIN',height=40,width=130, command=add_admin)
     addAdminButton.place(x=1050,y=20)

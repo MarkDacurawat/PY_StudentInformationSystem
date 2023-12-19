@@ -69,13 +69,13 @@ Before you begin, ensure you have met the following requirements:
 
 ## Screenshots
 
-![Login Screen](/screenshots/login.png)
+![Login Screen](/images/screenshots/login.png)
 _Caption: The login screen for administrators._
 
-![Main Page](/screenshots/mainpage.png)
+![Main Page](/images/screenshots/mainpage.png)
 _Caption: Manage student records - add, update, and delete._
 
-![Signup Form](/screenshots/signup.png)
+![Signup Form](/images/screenshots/signup.png)
 _Caption: Signup form to register new administrators._
 
 ## Contributing
