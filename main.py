@@ -143,6 +143,13 @@ Invalid password. Please ensure your password meets the following criteria:
                 if cursor:
                     cursor.close()
         
+        def backFunction():
+            signupWindow.withdraw()
+            mainWindow.deiconify()     
+            
+        backButton = customtkinter.CTkButton(signupWindow, text="<- Back",width=80,fg_color='red',hover_color="darkred",command=backFunction)
+        backButton.place(x=10,y=10)
+        
             
         fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"), size=(300, 300))
         signupLogo = customtkinter.CTkLabel(signupWindow,image=fepc_logo,text="")
@@ -501,9 +508,9 @@ def mainpageOutput():
         studentCourseEntry.set(values[9])    # Course
 
     # ---------- END OF FUNCTIONS ------------
-    fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"))
+    fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"),size=(60,60))
 
-    pageTitle = customtkinter.CTkLabel(mainWindow, text="STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"),image=fepc_logo,compound=tk.LEFT)
+    pageTitle = customtkinter.CTkLabel(mainWindow, text=" STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"),image=fepc_logo,compound=tk.LEFT)
     pageTitle.pack(pady=20, anchor="center")
 
     def add_admin():
