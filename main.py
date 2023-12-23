@@ -6,12 +6,15 @@ import mysql.connector
 from mysql.connector import Error
 from PIL import Image, ImageTk
 import re
+import os
 
 host = "localhost"
 user = "root"
 password = ""
 database = "student_information_db"
 
+current_directory = os.getcwd()
+fepc_logo_path = os.path.join(current_directory,'images/fepc-logo.png')
 
 try:
     db = mysql.connector.connect(host=host,user=user,password=password,database=database)
@@ -54,7 +57,7 @@ def loginWindowOutput():
     loginWindow.title("Login Form")
     loginWindow.geometry("710x400")
 
-    fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"), size=(300, 300))
+    fepc_logo = customtkinter.CTkImage(Image.open(fepc_logo_path), size=(300, 300))
     loginLogo = customtkinter.CTkLabel(loginWindow,image=fepc_logo,text="")
     loginLogo.place(x=40,y=50)
 
@@ -151,7 +154,7 @@ Invalid password. Please ensure your password meets the following criteria:
         backButton.place(x=10,y=10)
         
             
-        fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"), size=(300, 300))
+        fepc_logo = customtkinter.CTkImage(Image.open(fepc_logo_path), size=(300, 300))
         signupLogo = customtkinter.CTkLabel(signupWindow,image=fepc_logo,text="")
         signupLogo.place(x=40,y=50)
 
@@ -182,7 +185,7 @@ def mainpageOutput():
     # ---------- FUNCTIONS ------------
     lrn_pattern = re.compile(r'^\d{12}$')
     first_name_pattern = re.compile(r'^[A-Za-z]{1,30}(?: [A-Za-z]{1,30})?$')
-    middle_name_pattern = re.compile(r'^[A-Za-z]*(?: [A-Za-z]{1,30})*$')
+    middle_name_pattern = re.compile(r'^[A-Za-z]+(?: [A-Za-z]{1,30})*$')
     last_name_pattern = re.compile(r'^[A-Za-z]{1,30}(?: [A-Za-z]{1,30})?$')
     address_pattern = re.compile(r'^[A-Za-z0-9\s\.,#-]{1,100}$')
     phone_number_pattern = re.compile(r'^\d{11}$')
@@ -508,7 +511,7 @@ def mainpageOutput():
         studentCourseEntry.set(values[9])    # Course
 
     # ---------- END OF FUNCTIONS ------------
-    fepc_logo = customtkinter.CTkImage(Image.open("C:\\Users\\Lovely\\Desktop\\projects\\python\\SIS\\images\\fepc-logo.png"),size=(60,60))
+    fepc_logo = customtkinter.CTkImage(Image.open(fepc_logo_path),size=(60,60))
 
     pageTitle = customtkinter.CTkLabel(mainWindow, text=" STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"),image=fepc_logo,compound=tk.LEFT)
     pageTitle.pack(pady=20, anchor="center")
