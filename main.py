@@ -252,6 +252,12 @@ def mainpageOutput():
                 messagebox.showwarning("Warning", "Student with the same LRN already exists.")
                 return
 
+            # Ask for confirmation
+            confirmed = messagebox.askokcancel("Confirm Add student", "Add new Record?")
+
+            if not confirmed:
+                return
+
             # Execute an INSERT query
             cursor.execute("INSERT INTO students (student_lrn, student_firstname, student_middlename, student_lastname, student_gender, student_address, student_phonenumber, student_year_level,student_course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s)",
                         (lrn, first_name, middle_name, last_name, gender, address, phone_number, year_level, course))
