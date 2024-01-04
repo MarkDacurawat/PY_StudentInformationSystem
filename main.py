@@ -1,7 +1,6 @@
 import customtkinter
 from tkinter import *
 from tkinter import messagebox, ttk
-import tkinter as tk
 import mysql.connector
 from mysql.connector import Error
 from PIL import Image, ImageTk
@@ -519,7 +518,7 @@ def mainpageOutput():
     # ---------- END OF FUNCTIONS ------------
     fepc_logo = customtkinter.CTkImage(Image.open(fepc_logo_path),size=(60,60))
 
-    pageTitle = customtkinter.CTkLabel(mainWindow, text=" STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"),image=fepc_logo,compound=tk.LEFT)
+    pageTitle = customtkinter.CTkLabel(mainWindow, text=" STUDENT INFORMATION SYSTEM", font=("Arial", 30, "bold"),image=fepc_logo,compound=LEFT)
     pageTitle.pack(pady=20, anchor="center")
 
     def add_admin():
